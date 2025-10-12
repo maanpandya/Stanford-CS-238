@@ -19,7 +19,7 @@ function preprocess_data(filepath::String)
     vars = [Variable(Symbol(variable_names[i]), num_values[i]) for i in eachindex(variable_names)]
 
     #For later use, it's good to have the data as a Matrix{Int}
-    data_matrix = Matrix(df)' # Transpose to get variables in rows, samples in columns
+    data_matrix = collect(Matrix(df)') # Transpose to get variables in rows, samples in columns
     
     return vars, data_matrix
 

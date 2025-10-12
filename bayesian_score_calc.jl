@@ -1,5 +1,7 @@
 using Graphs
 using SpecialFunctions
+using LinearAlgebra
+include("data_processing.jl")
 
 function sub2ind(siz, x)
     k = vcat(1, cumprod(siz[1:end-1]))
@@ -29,7 +31,7 @@ end
 function prior(vars, G)
     n = length(vars)
     r = [vars[i].r for i in 1:n]
-    q = [prod([r[j] for j in inneighbors(G,i)]) for i in 1:n]
+    q = [prod([r[j] for j in inneighbors(G,i)]; init=1) for i in 1:n]
     return [ones(q[i], r[i]) for i in 1:n]
 end
 
@@ -47,4 +49,69 @@ function bayesian_score(vars, G, D)
     α = prior(vars, G)
     return sum(bayesian_score_component(M[i], α[i]) for i in 1:n)
 end
+
+#EXAMPLE USAGE SECTION
+
+
+# This function reads a .gph file and builds a Graphs.SimpleDiGraph
+# It needs the `vars` array to map variable names to integer indices.
+function read_gph(filepath::String, vars::Vector{Variable})
+    n = length(vars)
+    g = SimpleDiGraph(n)
     
+    # Create a mapping from variable name (Symbol) to its index (Int)
+    name_to_index = Dict(vars[i].name => i for i in 1:n)
+
+    for line in eachline(filepath)
+        # Skip empty lines
+        if isempty(strip(line))
+            continue
+        end
+        
+        parts = split(strip(line), ',')
+        if length(parts) == 2
+            src_name = Symbol(parts[1])
+            dst_name = Symbol(parts[2])
+            
+            # Check if the names are valid variables
+            if haskey(name_to_index, src_name) && haskey(name_to_index, dst_name)
+                src_idx = name_to_index[src_name]
+                dst_idx = name_to_index[dst_name]
+                add_edge!(g, src_idx, dst_idx)
+            else
+                println("Warning: Could not find variables for edge '$line' in the provided var list.")
+            end
+        else
+            println("Warning: Malformed line in .gph file: '$line'")
+        end
+    end
+    return g
+end
+
+
+function main(csv_path::String, gph_path::String)
+
+    # 1. Pre-process the data
+    println("1. Processing data from: $csv_path")
+    vars, data_matrix = preprocess_data(csv_path)
+    println("   - Found $(length(vars)) variables.")
+    println("   - Data matrix size is $(size(data_matrix)).")
+    println("-"^40)
+
+    # 2. Load the graph structure from the .gph file
+    println("2. Loading graph structure from: $gph_path")
+    G = read_gph(gph_path, vars)
+    println("   - Graph has $(nv(G)) vertices and $(ne(G)) edges.")
+    println("-"^40)
+
+    # 3. Calculate the Bayesian score
+    println("3. Calculating Bayesian score...")
+    score = bayesian_score(vars, G, data_matrix)
+    println("="^40)
+    
+    # 4. Print the final result
+    println("FINAL SCORE: $score")
+    println("="^40)
+end
+
+main("example/example.csv", "example/example.gph")
