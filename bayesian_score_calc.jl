@@ -1,4 +1,5 @@
 using Graphs
+using SpecialFunctions
 
 function sub2ind(siz, x)
     k = vcat(1, cumprod(siz[1:end-1]))
@@ -23,3 +24,27 @@ function statistics(vars, G, D::Matrix{Int})
     end
     return M
 end
+
+
+function prior(vars, G)
+    n = length(vars)
+    r = [vars[i].r for i in 1:n]
+    q = [prod([r[j] for j in inneighbors(G,i)]) for i in 1:n]
+    return [ones(q[i], r[i]) for i in 1:n]
+end
+
+function bayesian_score_component(M, α)
+    p = sum(loggamma.(α + M))
+    p -= sum(loggamma.(α))
+    p += sum(loggamma.(sum(α,dims=2)))
+    p -= sum(loggamma.(sum(α,dims=2) + sum(M,dims=2)))
+    return p
+end
+
+function bayesian_score(vars, G, D)
+    n = length(vars)
+    M = statistics(vars, G, D)
+    α = prior(vars, G)
+    return sum(bayesian_score_component(M[i], α[i]) for i in 1:n)
+end
+    
