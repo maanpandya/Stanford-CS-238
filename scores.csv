@@ -1,0 +1,3 @@
+dataset,method,options,score,duration
+small,local_search,"(restarts = 5,)",-3794.855597709798,6.605999946594238
+example,local_search,"(restarts = 5,)",-120.87502331229085,0.5690000057220459
