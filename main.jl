@@ -5,60 +5,58 @@ using Printf
 include("data_processing.jl")
 include("graph_utils.jl")
 include("search_local.jl")
-# include("search_k2.jl")
+include("search_k2.jl")
 # include("search_simulated_annealing.jl")
 
 """
-    log_score(score_file, dataset, method, score, duration, options)
+    log_score(score_file, dataset, method, score, duration, options) -> Bool
 
-Logs the results of an experiment to a CSV file.
-If an entry for the same (dataset, method, options) combination exists, it's updated.
-Otherwise, a new row is added.
+Logs the results of an experiment to a CSV file and returns `true` if the new score
+is an improvement over any existing entry, `false` otherwise.
 """
 function log_score(score_file::String, dataset::String, method::String, score::Float64, duration::Float64, options::NamedTuple)
     
+    is_improvement = false # This will be our return value
+
     log_entry = DataFrame(
-        dataset=dataset, 
-        method=method, 
-        options=string(options), 
-        score=score, 
-        duration=duration
+        dataset=[dataset], 
+        method=[method], 
+        options=[string(options)], 
+        score=[score], 
+        duration=[duration]
     )
 
     df = if isfile(score_file)
-        CSV.read(score_file, DataFrame)
+        CSV.read(score_file, DataFrame, types=Dict(:options => String))
     else
-        # If file doesn't exist, create an empty DataFrame with the correct types
         DataFrame(
-            dataset=String[], 
-            method=String[], 
-            options=String[], 
-            score=Float64[], 
-            duration=Float64[]
+            dataset=String[], method=String[], options=String[], 
+            score=Float64[], duration=Float64[]
         )
     end
 
-    # Check if a matching entry already exists
     existing_row_idx = findfirst(
-        r -> r.dataset == dataset && r.method == method && r.options == string(options),
+        r -> r.dataset == dataset && r.method == method,
         eachrow(df)
     )
 
     if isnothing(existing_row_idx)
-        # Append the new result
         append!(df, log_entry)
         println("Logging new result to $score_file.")
+        is_improvement = true
     else
-        # Update the existing result if the new score is better
         if score > df[existing_row_idx, :score]
             df[existing_row_idx, :] = log_entry[1, :]
             println("Updating with better score in $score_file.")
+            is_improvement = true
         else
             println("Keeping existing, better score in $score_file.")
+            # is_improvement remains false
         end
     end
 
     CSV.write(score_file, df)
+    return is_improvement
 end
 
 
@@ -81,27 +79,34 @@ function run_experiment(dataset_name::String, algorithm::Function, options::Name
     
     duration = end_time - start_time
     
-    # 3. Save the resulting graph
+    # 3. Log the score and check if it was an improvement
+    was_improvement = log_score("scores.csv", dataset_name, string(nameof(algorithm)), best_score, duration, options)
+    
+    # 4. Save the graph ONLY if the score was an improvement
     output_filename = "saved_graphs/$(dataset_name)_$(nameof(algorithm)).gph"
-    write_gph(best_graph, vars, output_filename)
-
-    # 4. Log the score to the CSV file
-    log_score("scores.csv", dataset_name, string(nameof(algorithm)), best_score, duration, options)
+    if was_improvement
+        println("New best score achieved. Saving graph to $output_filename")
+        write_gph(best_graph, vars, output_filename)
+    else
+        println("Did not find a better score. Graph file not updated.")
+    end
 
     # 5. Report results to console
     println("\n" * "-"^60)
     println("EXPERIMENT COMPLETE")
-    println("Final Score: $best_score")
-    println("Graph saved to: $output_filename")
-    @printf("Total time: %.2f seconds\n", duration)
+    println("Final Score (for this run): $best_score")
+    println("Total time: %.2f seconds\n", duration)
     println("-"^60)
 end
 
 function main()
 
-    dataset = "small" 
-    algo = local_search
-    opts = (restarts=5,) 
+    dataset = "large" 
+    algo = k2_search
+    opts = (orderings=1,) # For K2
+    # algo = local_search
+    # opts = (restarts=5,) # For local search
+
 
     run_experiment(dataset, algo, opts)
 end

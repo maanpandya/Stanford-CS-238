@@ -1,3 +1,6 @@
 dataset,method,options,score,duration
-small,local_search,"(restarts = 5,)",-3794.855597709798,6.605999946594238
-example,local_search,"(restarts = 5,)",-120.87502331229085,0.5690000057220459
+small,local_search,"(restarts = 5,)",-3794.855597709798,8.080000162124634
+example,local_search,"(restarts = 5,)",-120.87502331229085,0.7110002040863037
+medium,k2_search,"(orderings = 20,)",-96670.43033504602,91.96800017356873
+small,k2_search,"(orderings = 5,)",-3798.9950491923933,1.0880000591278076
+large,k2_search,"(orderings = 1,)",-432267.20061395265,524.3329999446869
