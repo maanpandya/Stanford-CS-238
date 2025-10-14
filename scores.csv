@@ -4,3 +4,6 @@ example,local_search,"(restarts = 5,)",-120.87502331229085,0.7110002040863037
 medium,k2_search,"(orderings = 20,)",-96670.43033504602,91.96800017356873
 small,k2_search,"(orderings = 5,)",-3798.9950491923933,1.0880000591278076
 large,k2_search,"(orderings = 1,)",-432267.20061395265,524.3329999446869
+small,simulated_annealing,"(initial_temp = 50.0, min_temp = 0.1, cool_rate = 0.995, max_iter = 10000)",-3798.755884592134,2.7049999237060547
+medium,simulated_annealing,"(initial_temp = 50.0, min_temp = 0.1, cool_rate = 0.995, max_iter = 10000)",-96971.84200790714,98.1710000038147
+large,simulated_annealing,"(initial_temp = 50.0, min_temp = 0.1, cool_rate = 0.995, max_iter = 10000)",-457223.3692005771,262.904000043869

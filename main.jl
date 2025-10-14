@@ -6,7 +6,7 @@ include("data_processing.jl")
 include("graph_utils.jl")
 include("search_local.jl")
 include("search_k2.jl")
-# include("search_simulated_annealing.jl")
+include("search_simulated_annealing.jl")
 
 """
     log_score(score_file, dataset, method, score, duration, options) -> Bool
@@ -27,7 +27,7 @@ function log_score(score_file::String, dataset::String, method::String, score::F
     )
 
     df = if isfile(score_file)
-        CSV.read(score_file, DataFrame, types=Dict(:options => String))
+        CSV.read(score_file, DataFrame, types=Dict(:options => String, :method => String, :dataset => String))
     else
         DataFrame(
             dataset=String[], method=String[], options=String[], 
@@ -102,11 +102,14 @@ end
 function main()
 
     dataset = "large" 
-    algo = k2_search
-    opts = (orderings=1,) # For K2
+    # algo = k2_search
+    # opts = (orderings=1,) # For K2
+
     # algo = local_search
     # opts = (restarts=5,) # For local search
 
+    algo = simulated_annealing
+    opts = (initial_temp=50.0, min_temp=0.1, cool_rate=0.995, max_iter=10000)
 
     run_experiment(dataset, algo, opts)
 end
