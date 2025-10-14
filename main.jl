@@ -7,6 +7,8 @@ include("graph_utils.jl")
 include("search_local.jl")
 include("search_k2.jl")
 include("search_simulated_annealing.jl")
+include("search_hybrid.jl")
+include("search_ensemble.jl")
 
 """
     log_score(score_file, dataset, method, score, duration, options) -> Bool
@@ -101,15 +103,26 @@ end
 
 function main()
 
+    algorithm = "ensemble_search"
+
     dataset = "large" 
-    # algo = k2_search
-    # opts = (orderings=1,) # For K2
 
-    # algo = local_search
-    # opts = (restarts=5,) # For local search
-
-    algo = simulated_annealing
-    opts = (initial_temp=50.0, min_temp=0.1, cool_rate=0.995, max_iter=10000)
+    if algorithm == "simulated_annealing"
+        algo = simulated_annealing
+        opts = (initial_temp=50.0, min_temp=0.1, cool_rate=0.995, max_iter=10000)
+    elseif algorithm == "k2_search"
+        algo = k2_search
+        opts = (orderings=1,)
+    elseif algorithm == "local_search"
+        algo = local_search
+        opts = (restarts=5,)
+    elseif algorithm == "fast_hybrid_search"
+        algo = fast_hybrid_search
+        opts = (max_parents=10,)
+    elseif algorithm == "ensemble_search"
+        algo = ensemble_search
+        opts = (num_runs=20, threshold=0.3, hybrid_options=(max_parents=5,))
+    end
 
     run_experiment(dataset, algo, opts)
 end
