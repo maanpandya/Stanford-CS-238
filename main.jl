@@ -121,7 +121,7 @@ function main()
         opts = (max_parents=10,)
     elseif algorithm == "ensemble_search"
         algo = ensemble_search
-        opts = (num_runs=20, threshold=0.3, hybrid_options=(max_parents=5,))
+        opts = (num_runs=10, threshold=0.3, hybrid_options=(max_parents=10,))
     end
 
     run_experiment(dataset, algo, opts)

@@ -10,4 +10,4 @@ large,simulated_annealing,"(initial_temp = 50.0, min_temp = 0.1, cool_rate = 0.9
 large,fast_hybrid_search,"(max_parents = 15,)",-422896.73294296715,233.56900000572205
 small,fast_hybrid_search,"(max_parents = 10,)",-3819.1565489851387,0.8980000019073486
 medium,ensemble_search,"(num_runs = 20, threshold = 0.3, hybrid_options = (max_parents = 5,))",-89759.24740404822,26.138999938964844
-large,ensemble_search,"(num_runs = 20, threshold = 0.3, hybrid_options = (max_parents = 5,))",-397797.3958872532,881.9189999103546
+large,ensemble_search,"(num_runs = 10, threshold = 0.3, hybrid_options = (max_parents = 10,))",-394248.74586912495,978.0190000534058
