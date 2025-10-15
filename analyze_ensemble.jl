@@ -30,12 +30,33 @@ function find_best_threshold(data_file::String, vars, data, thresholds_to_test)
     println("-"^50)
 
     for τ in thresholds_to_test
-        g_consensus = SimpleDiGraph(length(vars))
+    # CORRECTED GRAPH CONSTRUCTION
+
+        # Get all candidate edges that are above the current threshold
+        candidate_edges = Edge[]
         for (edge, count) in edge_counts
             if (count / total_runs) >= τ
-                add_edge!(g_consensus, src(edge), dst(edge))
+                push!(candidate_edges, edge)
             end
         end
+
+        # Sort these candidate edges by their confidence (count) in descending order.
+        # Prioritize the most confident edges.
+        sort!(candidate_edges, by=e -> edge_counts[e], rev=true)
+
+        # Build the consensus graph by greedily adding edges, ensuring it remains acyclic.
+        g_consensus = SimpleDiGraph(length(vars))
+        for edge in candidate_edges
+            # Add the edge
+            add_edge!(g_consensus, edge)
+            # Check if a cycle was introduced.
+            if is_cyclic(g_consensus)
+                # If so, this edge is invalid in the context of the current graph. Remove it
+                rem_edge!(g_consensus, edge)
+            end
+        end
+
+        # END OF CORRECTIONS
 
         score = bayesian_score(vars, g_consensus, data)
         @printf("τ = %-7.2f | %-20.4f | %-12d\n", τ, score, ne(g_consensus))
