@@ -55,7 +55,7 @@ end
 
 # This function reads a .gph file and builds a Graphs.SimpleDiGraph
 # It needs the `vars` array to map variable names to integer indices.
-# NOTE: AI was used to help generate this function because I was not able to find a lot of documentation on how to read a .gph file
+# NOTE: AI was used to help assist in writing this function because I was not able to find a lot of documentation on how to read a .gph file
 function read_gph(filepath::String, vars::Vector{Variable})
     n = length(vars)
     g = SimpleDiGraph(n)

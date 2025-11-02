@@ -9,7 +9,7 @@ include("bayesian_score_calc.jl")
 
 Calculates the mutual information I(X_i; X_j) from the data matrix.
 """
-#NOTE: AI HELPED WITH THIS FUNCTION
+
 function mutual_information(data::Matrix{Int}, i::Int, j::Int, r_i::Int, r_j::Int)
     num_samples = size(data, 2)
     

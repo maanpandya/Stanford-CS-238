@@ -56,8 +56,6 @@ function find_best_threshold(data_file::String, vars, data, thresholds_to_test)
             end
         end
 
-        # END OF CORRECTIONS
-
         score = bayesian_score(vars, g_consensus, data)
         @printf("τ = %-7.2f | %-20.4f | %-12d\n", τ, score, ne(g_consensus))
 
